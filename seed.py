@@ -43,17 +43,16 @@ def load_movies():
     Movie.query.delete()
 
     for row in open("seed_data/u.item"):
-        row = row.rstrip()
-        row = row.split("|")
+        row = row.rstrip().split("|")
 
         movie_id, title, released_at, imbd_url = row[0], row[1], row[2], row[4]
+
+        title = title[:-7].decode("latin-1")
 
         if released_at:
             released_at = datetime.strptime(released_at, '%d-%b-%Y')
         else:
             released_at = None
-
-        title = title[:-7]
 
         movie = Movie(movie_id=movie_id,
                       title=title,
@@ -67,6 +66,23 @@ def load_movies():
 
 def load_ratings():
     """Load ratings from u.data into database."""
+
+    print "Ratings"
+
+    Rating.query.delete()
+
+    for row in open("seed_data/u.data"):
+        row = row.rstrip().split("\t")
+
+        user_id, movie_id, score = row[0], row[1], row[2]
+
+        rating = Rating(movie_id=movie_id,
+                        user_id=user_id,
+                        score=score)
+
+        db.session.add(rating)
+
+    db.session.commit()
 
 
 def set_val_user_id():
