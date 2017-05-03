@@ -27,7 +27,7 @@ class User(db.Model):
         """Provide helpful representation when printed."""
 
         return "<User user_id=%s email=%s>" % (self.user_id,
-                                                    self.email)
+                                               self.email)
 
 # Put your Movie and Rating model classes here.
 

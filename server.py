@@ -37,6 +37,14 @@ def user_list():
     return render_template("user_list.html", users=users)
 
 
+@app.route("/movies")
+def movie_list():
+    """Show list of movies; returns list of movie titles."""
+
+    movies = Movie.query.order_by(Movie.title).all()
+    return render_template("movie_list.html", movies=movies)
+
+
 @app.route("/register")
 def register_form():
     """Renders register template form."""
@@ -60,13 +68,13 @@ def register_process():
     return redirect("/login-page")
 
 
-@app.route("/login-page")
+@app.route("/login")  # This is a get request.
 def login_page():
 
     return render_template("login.html")
 
 
-@app.route("/login")
+@app.route("/login", methods=["POST"])  # Post request; can have same route name.
 def login_process():
     """Takes information from register form and checks if a user with the
        email address/pwd matches, and if so, logs them in."""
@@ -83,7 +91,7 @@ def login_process():
         user_id = db.session.query(User.user_id).filter(User.email == email).one()
         print user_id[0]
         session['user_id'] = user_id[0]
-        return redirect("/")
+        return redirect("/users/%s" % (user_id[0]))
 
 
 @app.route("/logout")
@@ -100,9 +108,39 @@ def logout_process():
 def show_user_details(user_id):
     """Shows user details: age, zipcode, list of movies they rated and score."""
 
-    user = db.session.query(User).filter(User.user_id == user_id).first()
+    user = db.session.query(User).get(user_id)
 
     return render_template("user_info.html", user=user)
+
+
+@app.route("/movies/<movie_id>")
+def show_movie_details(movie_id):
+    """Shows movie details: title, release date, IMDB url, and list of ratings."""
+
+    movie = db.session.query(Movie).get(movie_id)
+
+    return render_template("movie_info.html", movie=movie)
+
+
+@app.route("/rate_movie", methods=["POST"])
+def rate_movie():
+    """Rates movie from the movie_info page if user is logged in."""
+
+    if 'user_id' in session:
+        movie_id = request.form.get("movie_id")
+        score = request.form.get("new_rating")
+
+        new_rating = Rating(movie_id=movie_id,
+                            user_id=session['user_id'],
+                            score=score)
+        db.session.add(new_rating)
+        db.session.commit()
+        flash("Success! Your rating has been added!")
+        return redirect("/")
+    else:
+        flash("Please log in!")
+        return redirect("/login")
+        # Auto redirects to a GET page, can't redirect to a POST page.
 
 
 if __name__ == "__main__":

@@ -6,6 +6,11 @@
       <li>User ID: {{ user.user_id }}</li>
       <li>Age: {{ user.age }}</li>
       <li>Zipcode: {{ user.zipcode }}</li>
-      <!-- <li> for loop </li> -->
+      <li>List of User Ratings:<br></li>
+        <ul>
+            {% for rating in user.ratings %}
+            <li>{{ rating.score }}</li>
+        {% endfor %}
+        </ul>
     </ul>
 {% endblock %}
