@@ -14,6 +14,8 @@ app = Flask(__name__)
 # Required to use Flask sessions and the debug toolbar
 app.secret_key = "ABC"
 
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+
 # Normally, if you use an undefined variable in Jinja2, it fails
 # silently. This is horrible. Fix this so that, instead, it raises an
 # error.
@@ -54,6 +56,34 @@ def register_process():
         new_user = User(email=email, password=pwd)
         db.session.add(new_user)
         db.session.commit()
+
+    return redirect("/login-page")
+
+
+@app.route("/login-page")
+def login_page():
+
+    return render_template("login.html")
+
+
+@app.route("/login")
+def login_process():
+    """Takes information from register form and checks if a user with the
+       email address/pwd matches, and if so, logs them in."""
+
+    email = request.args.get("email")
+    pwd = request.args.get("pwd")
+
+    if db.session.query(User).filter(User.email == email, User.password == pwd
+                                     ).first() is None:
+        flash("Email/password combination do not match.")
+        return redirect("/login-page")
+    else:
+        flash("Logged in! as %s" % email)
+        user_id = db.session.query(User.user_id).filter(User.email == email).one()
+        print user_id[0]
+        session['user_id'] = user_id[0]
+        return redirect("/")
 
 
 if __name__ == "__main__":
