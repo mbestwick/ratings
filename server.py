@@ -86,6 +86,25 @@ def login_process():
         return redirect("/")
 
 
+@app.route("/logout")
+def logout_process():
+    """Logs out current user."""
+
+    del session['user_id']
+    flash("You are now logged out. Goodbye!")
+
+    return redirect("/")
+
+
+@app.route("/users/<user_id>")
+def show_user_details(user_id):
+    """Shows user details: age, zipcode, list of movies they rated and score."""
+
+    user = db.session.query(User).filter(User.user_id == user_id).first()
+
+    return render_template("user_info.html", user=user)
+
+
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
