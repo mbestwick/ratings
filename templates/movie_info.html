@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <h2>Movie Info</h2>
+    <ul>
+      <li>Title: {{ movie.title }}</li>
+      <li>Release Date: {{ movie.released_at }}</li>
+      <li>IMDB: {{ movie.imdb_url }}</li>
+      <li>List of Movie Ratings:<br></li>
+        <ul>
+            {% for rating in movie.ratings %}
+            <li>{{ rating.score }}</li>
+        {% endfor %}
+        </ul>
+    </ul>
+
+    <form action="/rate_movie" method="POST">
+        <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
+        <input type="text" name="new_rating" placeholder="Enter your rating">
+        <input type="submit" value="submit">
+
+    </form>
+{% endblock %}
