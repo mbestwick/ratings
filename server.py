@@ -79,8 +79,8 @@ def login_process():
     """Takes information from register form and checks if a user with the
        email address/pwd matches, and if so, logs them in."""
 
-    email = request.args.get("email")
-    pwd = request.args.get("pwd")
+    email = request.form.get("email")
+    pwd = request.form.get("pwd")
 
     if db.session.query(User).filter(User.email == email, User.password == pwd
                                      ).first() is None:
@@ -117,9 +117,40 @@ def show_user_details(user_id):
 def show_movie_details(movie_id):
     """Shows movie details: title, release date, IMDB url, and list of ratings."""
 
-    movie = db.session.query(Movie).get(movie_id)
+    movie = Movie.query.get(movie_id)
 
-    return render_template("movie_info.html", movie=movie)
+    if 'user' in session:
+        user_id = session['user_id']
+    else:
+        user_id = ""
+
+    if user_id:
+        user_rating = Rating.query.filter_by(
+            movie_id=movie_id, user_id=user_id).first()
+    else:
+        user_rating = None
+
+    # Get average rating of movie
+
+    rating_scores = [r.score for r in movie.ratings]
+    avg_rating = float(sum(rating_scores)) / len(rating_scores)
+
+    prediction = None
+
+     # Prediction code: only predict if the user hasn't rated it.
+
+    if (not user_rating) and user_id:
+        user = User.query.get(user_id)
+        if user:
+            prediction = user.predict_rating(movie)
+
+    return render_template(
+        "movie_info.html",
+        movie=movie,
+        user_rating=user_rating,
+        average=avg_rating,
+        prediction=prediction
+        )
 
 
 @app.route("/rate_movie", methods=["POST"])
@@ -128,12 +159,20 @@ def rate_movie():
 
     if 'user_id' in session:
         movie_id = request.form.get("movie_id")
+        user_id = session['user_id']
         score = request.form.get("new_rating")
 
-        new_rating = Rating(movie_id=movie_id,
-                            user_id=session['user_id'],
-                            score=score)
-        db.session.add(new_rating)
+        if db.session.query(Rating).filter(Rating.movie_id == movie_id,
+                                           Rating.user_id == user_id).count() == 0:
+            new_rating = Rating(movie_id=movie_id,
+                                user_id=user_id,
+                                score=score)
+            db.session.add(new_rating)
+        else:
+            update = db.session.query(Rating).filter(Rating.movie_id == movie_id,
+                                                     Rating.user_id == user_id).first()
+            update.score = score
+
         db.session.commit()
         flash("Success! Your rating has been added!")
         return redirect("/")

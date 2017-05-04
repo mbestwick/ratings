@@ -5,7 +5,11 @@
     <ul>
       <li>Title: {{ movie.title }}</li>
       <li>Release Date: {{ movie.released_at }}</li>
-      <li>IMDB: {{ movie.imdb_url }}</li>
+      <li>IMDB: <a href="{{ movie.imdb_url }}">{{ movie.imdb_url }}</a></li>
+      <li>Average rating: {{ average }}</li>
+      {% if prediction %}
+        <li>We predict you will rate this movie {{ prediction }}</li>
+      {% endif %}
       <li>List of Movie Ratings:<br></li>
         <ul>
             {% for rating in movie.ratings %}

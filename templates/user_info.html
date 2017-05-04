@@ -9,7 +9,8 @@
       <li>List of User Ratings:<br></li>
         <ul>
             {% for rating in user.ratings %}
-            <li>{{ rating.score }}</li>
+            <li><a href="/movies/{{ rating.movie_id }}">{{ rating.movie.title }}</a>: 
+                {{ rating.score }}</li>
         {% endfor %}
         </ul>
     </ul>
