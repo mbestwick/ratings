@@ -119,10 +119,7 @@ def show_movie_details(movie_id):
 
     movie = Movie.query.get(movie_id)
 
-    if 'user' in session:
-        user_id = session['user_id']
-    else:
-        user_id = ""
+    user_id = session.get('user_id')
 
     if user_id:
         user_rating = Rating.query.filter_by(
@@ -132,14 +129,14 @@ def show_movie_details(movie_id):
 
     # Get average rating of movie
 
+    prediction = None
+
     rating_scores = [r.score for r in movie.ratings]
     avg_rating = float(sum(rating_scores)) / len(rating_scores)
 
-    prediction = None
+     # Prediction: only predict if the user hasn't rated it.
 
-     # Prediction code: only predict if the user hasn't rated it.
-
-    if (not user_rating) and user_id:
+    if (user_rating is None) and user_id:
         user = User.query.get(user_id)
         if user:
             prediction = user.predict_rating(movie)

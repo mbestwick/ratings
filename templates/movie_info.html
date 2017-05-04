@@ -4,11 +4,13 @@
     <h2>Movie Info</h2>
     <ul>
       <li>Title: {{ movie.title }}</li>
-      <li>Release Date: {{ movie.released_at }}</li>
+      <li>Release Date: {{ movie.released_at.strftime('%B %d, %Y') }}</li>
       <li>IMDB: <a href="{{ movie.imdb_url }}">{{ movie.imdb_url }}</a></li>
-      <li>Average rating: {{ average }}</li>
+      <li>Average rating: {{ "{:.1f}".format(average) }}</li>
       {% if prediction %}
-        <li>We predict you will rate this movie {{ prediction }}</li>
+        <li>We predict you will rate this movie: {{ "{:.1f}".format(prediction) }}</li>
+      {% else %}
+        <li>You rated this movie: {{ "{:.1f}".format(user_rating.score) }}</li>
       {% endif %}
       <li>List of Movie Ratings:<br></li>
         <ul>
