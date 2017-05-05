@@ -141,12 +141,42 @@ def show_movie_details(movie_id):
         if user:
             prediction = user.predict_rating(movie)
 
+    if prediction:
+        effective_rating = prediction
+    elif user_rating:
+        effective_rating = user_rating.score
+    else:
+        effective_rating = 1
+
+    the_eye = (User.query.filter_by(email="the-eye@of-judgment.com").one())
+    eye_rating = Rating.query.filter_by(user_id=the_eye.user_id,
+                                        movie_id=movie.movie_id).first()
+
+    if eye_rating is None:
+        eye_rating = the_eye.predict_rating(movie)
+    else:
+        eye_rating = eye_rating.score
+
+    difference = abs(eye_rating - effective_rating)
+
+    BERATEMENT_MESSAGES = [
+        "I suppose you don't have such bad taste after all.",
+        "I regret every decision that I've ever made that has brought me to "
+        + "listen to your opinion.",
+        "Words fail me, as your taste in movies has clearly failed you.",
+        "That movie is great. For a clown to watch. Idiot.",
+        "Words cannot express the awfulness of your taste."
+    ]
+
+    beratement = BERATEMENT_MESSAGES[int(difference)]
+
     return render_template(
         "movie_info.html",
         movie=movie,
         user_rating=user_rating,
         average=avg_rating,
-        prediction=prediction
+        prediction=prediction,
+        beratement=beratement
         )
 
 

@@ -12,6 +12,7 @@
       {% else %}
         <li>You rated this movie: {{ "{:.1f}".format(user_rating.score) }}</li>
       {% endif %}
+      <li>{{ beratement }}</li>
       <li>List of Movie Ratings:<br></li>
         <ul>
             {% for rating in movie.ratings %}
